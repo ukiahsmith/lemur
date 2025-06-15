@@ -1,0 +1,149 @@
+
+// Bazaar
+// ––––––––––––––––––––––––––––––––––––––––––––––––––
+
+
+
+@import "../vendor/css/normalize.css";
+@import "../vendor/sass/jmb/main.scss";
+
+// The base font-size is set at 62.5% for having the convenience
+// of sizing rems in a way that is similar to using px: 1.6rem = 16px
+html {
+    min-height: 100%;
+}
+
+// Default body styles
+body {
+  color: #222222;
+  display: flex;
+  flex-direction: column;
+  font-family: 'Helvetica Neue', 'Helvetica', 'Roboto', 'Arial', sans-serif;
+  font-weight: 300;
+  height: 100%;
+  letter-spacing: .01em;
+  line-height: 1.618;
+  margin: 0;
+  padding: 0;
+}
+
+.site-header {
+   background-color: #f9f2e3;
+}
+
+.site-logo {
+	color: #24aac6;
+	font-family: "Marker Felt";
+	font-size: 39px;
+	line-height: 0;
+    padding: 48px 0 0 0;
+    margin: 0;
+}
+
+.site-search {
+    padding: 1em 0 0 0;
+}
+
+.site-search-input {
+    padding: .5em;
+    float: left;
+    display: block;
+    width: 100%;
+    margin-right: -63px;
+    padding-right: 65px;
+}
+.site-search-action {
+    margin: .5em 0;
+}
+
+.actionbar {
+    float: right;
+    padding: 0;
+    margin: 0;
+}
+.actionbar li {
+    display: inline-block;
+    list-style: none;
+    margin-right: .8em;
+}
+.actionbar li:last-child {
+    margin-right: 0;
+}
+.actionbar li > a {
+    color: #222;
+    font-size: 14px;
+    text-align: center;
+    text-decoration: none;
+}
+.actionbar li > a:hover {
+    border-bottom: 2px solid #000;
+}
+.actionbar li > a > div {
+}
+
+.site-menu {
+    font-size: 13px;
+    padding: .5em 0;
+    margin: 0;
+}
+.site-menu li {
+    display: inline-block;
+    list-style: none;
+    padding-right: 2em;
+}
+.site-menu a {
+    color: #886a42;
+    text-decoration: none;
+}
+.site-menu a:hover {
+    border-bottom: 4px solid #eec898;
+}
+
+
+/* == Homepage Main ========================================================= */
+
+.wrap-main {
+    /* height: 100%; */
+}
+
+.sub-hero {
+	margin: 2em auto;
+	border-radius: 100%;
+	overflow: hidden;
+	width: 220px;
+	height: 220px;
+}
+.sub-hero img {
+	position: relative;
+	left: -55;
+	top: -30;
+}
+
+
+
+
+/* == Footer ================================================================ */
+
+.footer {
+    /* background-color: rgb(33, 33, 33); */
+/*    background-color: #cadf94; /* a Green */
+    /* color: rgb(212, 212, 212); */
+    background-color: #b2e7f2; /* a blue, from the logo color */
+    color: #6d3308;
+    padding: 1em 0 0 0;
+    margin: 0;
+}
+
+.footer a {
+    color: inherit;
+}
+
+.footer a:hover {
+    color: rgb(175, 134, 47);
+}
+
+.footer .copyright {
+    background-color: #574436;
+    color: #f4e1c9;
+    padding: 2em 0;
+}

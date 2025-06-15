@@ -1,0 +1,18 @@
+<html>
+	<head>
+        <title>{{ .Title }}</title>
+        {{/* <link rel="stylesheet" href="/css/normalize.css"> */}}
+        {{/* <link rel="stylesheet" href="/css/milligram.css"> */}}
+		<link rel="stylesheet" href="/css/style.css">
+	</head>
+
+  <body>
+    <div class='container'>
+		{{ template "site-header.html.tmpl" . }}
+		<div class="wrap-main">
+            {{ block "main.html.tmpl" . }}error: template supplied no main.html.tmpl file.{{ end }}
+        </div>
+		{{ template "footer.html.tmpl" . }}
+    </div>
+  </body>
+</html>

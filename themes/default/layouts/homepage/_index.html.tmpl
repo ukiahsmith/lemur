@@ -1,0 +1,48 @@
+<html>
+	<head>
+		<title>Homepage</title>
+		<link rel="stylesheet" href="/css/style.css">
+	</head>
+	
+	<body>
+		{{ template "site-header.html" . }}
+		<div class="wrap-main">
+
+			<div class="row">
+				<div class="column small-12">
+				  <h2>Welcome back {{ .Name }}</h2>
+				  <div class="hero">
+					<img src="https://placekitten.com/1280/400">
+				  </div>
+				</div>
+						
+			</div>
+
+			<div class="row">
+				<div class="column small-3">
+					<div class="sub-hero">
+					<img src=https://placekitten.com/320/320>
+					</div>
+				</div>
+				<div class="column small-3">
+					<div class="sub-hero">
+					<img src=https://placekitten.com/320/321>
+					</div>
+				</div>
+				<div class="column small-3">
+					<div class="sub-hero">
+					<img src=https://placekitten.com/321/320>
+					</div>
+				</div>
+				<div class="column small-3">
+					<div class="sub-hero">
+					<img src=https://placekitten.com/320/322>
+					</div>
+				</div>
+			</div>
+			
+		</div>
+
+		{{ template "footer.html" . }}
+	</body>
+</html>
