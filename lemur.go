@@ -10,6 +10,12 @@ import (
 	"github.com/ukiahsmith/lemur/funcs"
 )
 
+const (
+	LAYOUTS_DIR_PATH       = "layouts"
+	DEFAULT_TEMPLATE       = "_defaults"
+	DEFAULT_TEMPLATE_INDEX = "_index.html.tmpl"
+)
+
 type Lemur struct {
 	layouts map[string]*template.Template
 	funcs   template.FuncMap
@@ -57,8 +63,7 @@ func (wh *Lemur) initializeFuncMaps(userFuncs template.FuncMap) {
 
 // processDefaultsDirectory handles the special _defaults directory
 func processDefaultsDirectory(templateFS fs.FS, tmpl *template.Template) (*template.Template, error) {
-	layoutsDirPath := "layouts"
-	defaultsDirFullPath := filepath.Join(layoutsDirPath, "_defaults")
+	defaultsDirFullPath := filepath.Join(LAYOUTS_DIR_PATH, DEFAULT_TEMPLATE)
 
 	// Read the defaults directory
 	defaultEntries, err := fs.ReadDir(templateFS, defaultsDirFullPath)
@@ -67,7 +72,7 @@ func processDefaultsDirectory(templateFS fs.FS, tmpl *template.Template) (*templ
 	}
 
 	// Parse _defaults/_index.html.tmpl first, if it exists, into the base tmpl
-	tmpl, err = processDefaultsIndexTemplate(templateFS, tmpl, layoutsDirPath)
+	tmpl, err = processDefaultsIndexTemplate(templateFS, tmpl, LAYOUTS_DIR_PATH)
 	if err != nil {
 		return nil, err
 	}
@@ -78,11 +83,11 @@ func processDefaultsDirectory(templateFS fs.FS, tmpl *template.Template) (*templ
 			continue
 		}
 		fileName := de.Name()
-		if fileName == "_index.html.tmpl" || fileName[0] == '.' {
+		if fileName == DEFAULT_TEMPLATE_INDEX || fileName[0] == '.' {
 			continue
 		}
 
-		defaultFileRelPath := filepath.Join(layoutsDirPath, "_defaults", fileName)
+		defaultFileRelPath := filepath.Join(LAYOUTS_DIR_PATH, DEFAULT_TEMPLATE, fileName)
 		tmpl, err = parseTemplateFile(templateFS, tmpl, defaultFileRelPath, filepath.Base(defaultFileRelPath))
 		if err != nil {
 			return nil, fmt.Errorf("failed to process default template file %s: %w", defaultFileRelPath, err)
@@ -94,7 +99,7 @@ func processDefaultsDirectory(templateFS fs.FS, tmpl *template.Template) (*templ
 
 // processDefaultsIndexTemplate handles the special _defaults/_index.html.tmpl file
 func processDefaultsIndexTemplate(templateFS fs.FS, tmpl *template.Template, layoutsDirPath string) (*template.Template, error) {
-	defaultsIndexRelPath := filepath.Join(layoutsDirPath, "_defaults", "_index.html.tmpl")
+	defaultsIndexRelPath := filepath.Join(layoutsDirPath, DEFAULT_TEMPLATE, DEFAULT_TEMPLATE_INDEX)
 
 	if _, statErr := fs.Stat(templateFS, defaultsIndexRelPath); statErr != nil {
 		return nil, fmt.Errorf("error stating _defaults/_index.html.tmpl %q: %w", defaultsIndexRelPath, statErr)
@@ -123,15 +128,14 @@ func parseTemplateFile(templateFS fs.FS, tmpl *template.Template, filePath strin
 // processLayoutDirectories handles all layout directories and their templates
 func processLayoutDirectories(templateFS fs.FS, baseTmpl *template.Template) (map[string]*template.Template, error) {
 	layoutMap := make(map[string]*template.Template)
-	layoutsDirPath := "layouts"
 
 	// Get all entries in the layouts directory
-	entries, err := fs.ReadDir(templateFS, layoutsDirPath)
+	entries, err := fs.ReadDir(templateFS, LAYOUTS_DIR_PATH)
 	if err != nil {
 		if errors.Is(err, fs.ErrNotExist) {
-			return nil, fmt.Errorf("%w: supplied filesystem does not contain directory %s", ErrTemplateDir, layoutsDirPath)
+			return nil, fmt.Errorf("%w: supplied filesystem does not contain directory %s", ErrTemplateDir, LAYOUTS_DIR_PATH)
 		}
-		return nil, fmt.Errorf("%w: reading %s from filesystem: %s", ErrTemplateDir, layoutsDirPath, err)
+		return nil, fmt.Errorf("%w: reading %s from filesystem: %s", ErrTemplateDir, LAYOUTS_DIR_PATH, err)
 	}
 
 	// Process each layout directory
@@ -146,7 +150,7 @@ func processLayoutDirectories(templateFS fs.FS, baseTmpl *template.Template) (ma
 		}
 
 		// Process a single layout directory
-		tmpl, err := processLayoutDirectory(templateFS, baseTmpl, layoutsDirPath, name)
+		tmpl, err := processLayoutDirectory(templateFS, baseTmpl, LAYOUTS_DIR_PATH, name)
 		if err != nil {
 			return nil, err
 		}
@@ -188,7 +192,7 @@ func processLayoutDirectory(templateFS fs.FS, baseTmpl *template.Template, layou
 	// Process all other template files in this layout
 	for _, tmplEntry := range tmplEntries {
 		tmplFileName := tmplEntry.Name()
-		if tmplFileName[0] == '.' || tmplFileName == "_index.html.tmpl" {
+		if tmplFileName[0] == '.' || tmplFileName == DEFAULT_TEMPLATE_INDEX {
 			continue
 		}
 
@@ -204,7 +208,7 @@ func processLayoutDirectory(templateFS fs.FS, baseTmpl *template.Template, layou
 
 // ensureDefaultBlockStructure ensures the template has the required block structure
 func ensureDefaultBlockStructure(tmpl *template.Template, layoutName string) (*template.Template, error) {
-	if tmpl.Lookup("_index.html.tmpl") == nil {
+	if tmpl.Lookup(DEFAULT_TEMPLATE_INDEX) == nil {
 		// This parses directly into tmpl and defines templates named "_index.html.tmpl" and "_main.html.tmpl"
 		// if they are not already defined at the top level of tmpl.
 		parsedTmpl, err := tmpl.Parse(`{{- block "_index.html.tmpl" . -}}{{- block "_main.html.tmpl" . -}}{{- end -}}{{- end }}`)
@@ -218,7 +222,7 @@ func ensureDefaultBlockStructure(tmpl *template.Template, layoutName string) (*t
 
 // processLayoutIndexTemplate handles the _index.html.tmpl file for a layout
 func processLayoutIndexTemplate(templateFS fs.FS, tmpl *template.Template, layoutsDirPath string, layoutName string) (*template.Template, error) {
-	namedTmplIndexRelPath := filepath.Join(layoutsDirPath, layoutName, "_index.html.tmpl")
+	namedTmplIndexRelPath := filepath.Join(layoutsDirPath, layoutName, DEFAULT_TEMPLATE_INDEX)
 
 	if _, statErr := fs.Stat(templateFS, namedTmplIndexRelPath); statErr == nil {
 		return parseTemplateFile(templateFS, tmpl, namedTmplIndexRelPath, filepath.Base(namedTmplIndexRelPath))
@@ -231,19 +235,18 @@ func processLayoutIndexTemplate(templateFS fs.FS, tmpl *template.Template, layou
 
 // validateTemplateDirectory checks if the template filesystem has the correct structure
 func validateTemplateDirectory(templateFS fs.FS) error {
-	layoutsDir := "layouts"
-	layoutsInfo, err := fs.Stat(templateFS, layoutsDir)
+	layoutsInfo, err := fs.Stat(templateFS, LAYOUTS_DIR_PATH)
 	if err != nil {
 		if errors.Is(err, fs.ErrNotExist) {
-			return fmt.Errorf("%w: layouts directory %s does not exist in the filesystem", ErrTemplateDir, layoutsDir)
+			return fmt.Errorf("%w: layouts directory %s does not exist in the filesystem", ErrTemplateDir, LAYOUTS_DIR_PATH)
 		}
-		return fmt.Errorf("%w: checking layouts directory %s in the filesystem: %s", ErrTemplateDir, layoutsDir, err)
+		return fmt.Errorf("%w: checking layouts directory %s in the filesystem: %s", ErrTemplateDir, LAYOUTS_DIR_PATH, err)
 	}
 	if !layoutsInfo.IsDir() {
-		return fmt.Errorf("%w: path %s is not a directory in the filesystem", ErrTemplateDir, layoutsDir)
+		return fmt.Errorf("%w: path %s is not a directory in the filesystem", ErrTemplateDir, LAYOUTS_DIR_PATH)
 	}
 
-	defaultsDir := filepath.Join(layoutsDir, "_defaults")
+	defaultsDir := filepath.Join(LAYOUTS_DIR_PATH, DEFAULT_TEMPLATE)
 	defaultsInfo, err := fs.Stat(templateFS, defaultsDir)
 	if err != nil {
 		if errors.Is(err, fs.ErrNotExist) {
